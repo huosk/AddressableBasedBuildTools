@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Assets-Textures-man30_Eye_Colour.jpg
+  m_EditorClassIdentifier: 
+  m_GroupName: Assets-Textures-man30_Eye_Colour.jpg
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 8075e04dbc7a67a45b0269817f868fac
+  m_SerializeEntries:
+  - m_GUID: cdf225bc4116d8d4cb71653a8bf3678f
+    m_Address: Assets/Textures/man30_Eye_Colour.jpg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 1397cce077cafcd41ab8527bde8816cd, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 20a18c88e2fb512478da274c160e6935, type: 2}
+    - {fileID: 11400000, guid: 49b5041b3bd2fa642a63aa09226346a0, type: 2}
