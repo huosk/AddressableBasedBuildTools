@@ -6,11 +6,11 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Build;
 
-public class BuildContentPhase : IPiplePhase
+public class BuildContentPhase : APipePhase
 {
     public AddressableAssetSettings Setting { get; set; }
 
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
         int activeBuilder = 0;
         for (int i = 0; i < Setting.DataBuilders.Count; i++)

@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: eefb6f78c101a90469ee83de17cab977
   m_SerializeEntries:
   - m_GUID: fa6f4c1b59cd59541925470a9b6d7aaa
-    m_Address: Assets/Textures/New Material 1.mat
+    m_Address: Textures/New Material 1.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}

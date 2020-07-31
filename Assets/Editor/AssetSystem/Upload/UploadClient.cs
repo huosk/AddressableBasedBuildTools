@@ -28,69 +28,36 @@ public class UploadClient
         if (setting == null)
             return;
 
-        //var ipAddress = await Dns.GetHostAddressesAsync("localHost");
-        //var ipv4 = ipAddress.FirstOrDefault((v) => v.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-
-        IUploadClient uploader = GetClientByHost(HostType);
-        uploader.Host = Host;
-        uploader.UserName = UserName;
-        uploader.Password = Password;
-
-        await uploader.Initialize();
-
-        List<UploadGroupInfo> uploadGroups = CollectFilesToUpload(setting);
-
-        await UploadEntryPhase.UploadGroups(uploader, uploadGroups);
-
-        await uploader.Release();
-    }
-
-    private static IUploadClient GetClientByHost(HostType type)
-    {
-        if (type == HostType.Ftp)
-            return new FtpUploadClient();
-        else if (type == HostType.Http)
-            return new HttpUploadClient();
-        else
-            throw new NotSupportedException("不支持上传::" + type);
-    }
-
-    private static List<UploadGroupInfo> CollectFilesToUpload(AddressableAssetSettings setting)
-    {
-        List<UploadGroupInfo> uploadGroups = new List<UploadGroupInfo>();
-
-        var activeProfile = setting.activeProfileId;
-        var groups = setting.groups;
-
-        HashSet<KeyValuePair<string, string>> groupPathPairs = new HashSet<KeyValuePair<string, string>>();
-
-        for (int i = 0; i < groups.Count; i++)
+        // 创建组模板
+        var groupTemplete = PipleUtility.GetTemplete(setting, false);
+        if (groupTemplete == null)
         {
-            var group = groups[i];
-            var schema = group.GetSchema<BundledAssetGroupSchema>();
-            if (schema == null)
-                continue;
-
-            var groupBuildPath = schema.BuildPath.GetValue(setting.profileSettings, activeProfile);
-            var groupLoadPath = schema.LoadPath.GetValue(setting.profileSettings, activeProfile);
-
-            groupPathPairs.Add(new KeyValuePair<string, string>(groupBuildPath, groupLoadPath));
+            EditorUtility.DisplayDialog("提示", "上传失败，未找到组模板！", "确定");
+            return;
         }
 
-        foreach (var kvp in groupPathPairs)
+        var groupTempleteBundleSchema = groupTemplete.GetSchemaByType(typeof(BundledAssetGroupSchema)) as BundledAssetGroupSchema;
+        string groupBuildPath = groupTempleteBundleSchema.BuildPath.GetValue(setting.profileSettings, setting.activeProfileId);
+        string groupLoadPath = groupTempleteBundleSchema.LoadPath.GetValue(setting.profileSettings, setting.activeProfileId);
+
+        UploadEntryPhase phase = new UploadEntryPhase();
+        phase.HostType = HostType;
+        phase.Host = Host;
+        phase.UserName = UserName;
+        phase.Password = Password;
+        phase.RemoteBuildPath = groupBuildPath;
+        phase.RemoteLoadPath = groupLoadPath;
+        phase.OnWillProcess = (c) => EditorUtility.DisplayDialog("提示", "是否上传到服务器？", "是", "取消");
+
+        PipeContext context = new PipeContext();
+
+        try
         {
-            string groupBuildPath = kvp.Key;
-            string groupLoadPath = kvp.Value;
-
-            string[] files = Directory.GetFiles(groupBuildPath, "*.*", SearchOption.AllDirectories);
-            uploadGroups.Add(new UploadGroupInfo()
-            {
-                localPath = groupBuildPath,
-                remotePath = groupLoadPath,
-                files = files
-            });
+            await phase.Process(context);
         }
-
-        return uploadGroups;
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
     }
 }

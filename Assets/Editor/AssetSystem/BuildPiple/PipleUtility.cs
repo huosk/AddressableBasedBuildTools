@@ -4,6 +4,7 @@ using UnityEditor.AddressableAssets.Settings;
 using System.Linq;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor;
+using System.Text.RegularExpressions;
 
 public class PipleUtility
 {
@@ -20,6 +21,8 @@ public class PipleUtility
             return AssetType.Material;
         else if (tp == typeof(AnimationClip))
             return AssetType.AnimationClip;
+        else if (tp == typeof(Shader))
+            return AssetType.Shader;
         else
             return AssetType.Unknown;
     }
@@ -29,7 +32,7 @@ public class PipleUtility
     /// </summary>
     /// <param name="setting"></param>
     /// <returns></returns>
-    public static AddressableAssetGroupTemplate GetTemplete(AddressableAssetSettings setting)
+    public static AddressableAssetGroupTemplate GetTemplete(AddressableAssetSettings setting, bool autoCreate)
     {
         string groupTempleteName = @"__generated";
         string groupTempleteDescription = @"group templete only use for auto build";
@@ -42,7 +45,7 @@ public class PipleUtility
 
         var groupTemplete = setting.GroupTemplateObjects.FirstOrDefault(groupTempleteFilter) as AddressableAssetGroupTemplate;
 
-        if (groupTemplete == null)
+        if (groupTemplete == null && autoCreate)
         {
             if (!setting.CreateAndAddGroupTemplate(groupTempleteName, groupTempleteDescription, typeof(BundledAssetGroupSchema), typeof(ContentUpdateGroupSchema)))
             {
@@ -53,6 +56,9 @@ public class PipleUtility
             groupTemplete = setting.GroupTemplateObjects.FirstOrDefault(groupTempleteFilter) as AddressableAssetGroupTemplate;
             setting.SetDirty(AddressableAssetSettings.ModificationEvent.GroupTemplateAdded, groupTemplete, true, true);
         }
+
+        if (groupTemplete == null)
+            return null;
 
         var bundleSchema = groupTemplete.GetSchemaByType(typeof(BundledAssetGroupSchema)) as BundledAssetGroupSchema;
         bundleSchema.BuildPath.SetVariableByName(setting, "RemoteBuildPath");

@@ -5,14 +5,18 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
-public class SaveManifestPhase : IPiplePhase
+public class SaveManifestPhase : APipePhase
 {
     public string OutputPath { get; set; }
 
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
+        if (context == null)
+            throw new System.ArgumentNullException("context");
+
+        List<AssetEntry> assets = context.assets;
         if (assets == null)
-            throw new System.ArgumentNullException("assets");
+            return false;
 
         AssetManifestFile manifestFile = new AssetManifestFile();
         manifestFile.assets = assets;
@@ -21,7 +25,15 @@ public class SaveManifestPhase : IPiplePhase
         if (!Directory.Exists(OutputPath))
             Directory.CreateDirectory(OutputPath);
 
-        File.WriteAllText(previewCatalogFile, JsonConvert.SerializeObject(manifestFile, Formatting.Indented));
+        try
+        {
+            File.WriteAllText(previewCatalogFile, JsonConvert.SerializeObject(manifestFile, Formatting.Indented));
+            context.manifestFile = previewCatalogFile;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogException(e);
+        }
 
         await Task.FromResult(true);
         return true;

@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: ca963397f0270ad4d802c5929c16a1a1
   m_SerializeEntries:
   - m_GUID: 7476b763c343fd746b43c1abd2505811
-    m_Address: Assets/Prefabs/Sphere.prefab
+    m_Address: Sphere.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}

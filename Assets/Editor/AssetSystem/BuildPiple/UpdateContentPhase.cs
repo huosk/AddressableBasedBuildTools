@@ -6,17 +6,22 @@ using UnityEngine.AddressableAssets;
 using System.IO;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using System;
 
-public class UpdateContentPhase : IPiplePhase
+public class UpdateContentPhase : APipePhase
 {
-    public AddressableAssetSettings Setting { get; set; }
-
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
-        string stateAssetPath = Setting.ConfigFolder;
+        if (context == null)
+            throw new ArgumentNullException("context");
+
+        if (context.setting == null)
+            throw new System.ArgumentNullException("context.setting");
+
+        string stateAssetPath = context.setting.ConfigFolder;
         stateAssetPath = Path.Combine(stateAssetPath, PlatformMappingService.GetPlatform().ToString());
         var content_state_path = Path.Combine(stateAssetPath, "addressables_content_state.bin");
-        var result = ContentUpdateScript.BuildContentUpdate(Setting, content_state_path);
+        var result = ContentUpdateScript.BuildContentUpdate(context.setting, content_state_path);
         bool buildSuccess = result != null && string.IsNullOrEmpty(result.Error);
 
         await Task.FromResult(true);

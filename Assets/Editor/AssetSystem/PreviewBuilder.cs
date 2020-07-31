@@ -37,12 +37,14 @@ public class PreviewBuilder
         if (obj == null)
             return default;
 
+        Selection.activeObject = obj;
         Texture2D tex = AssetPreview.GetAssetPreview(obj);
         int tryCount = 0;
-        while ((tex == null || AssetPreview.IsLoadingAssetPreview(obj.GetInstanceID())) && tryCount < 10)
+        while ((tex == null || AssetPreview.IsLoadingAssetPreview(obj.GetInstanceID())) && tryCount < 5)
         {
             tryCount++;
-            await Task.Delay(1000);
+            await Task.Delay(100);
+            tex = AssetPreview.GetAssetPreview(obj);
         }
 
         return new PreviewData()
@@ -70,7 +72,6 @@ public class PreviewBuilder
 
         File.WriteAllBytes(previewPath, previewData.texture.EncodeToPNG());
     }
-
 }
 
 public class PreviewData

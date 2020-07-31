@@ -4,16 +4,24 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor;
+using System.IO;
 
-public class CreateGroupPhase : IPiplePhase
+public class CreateGroupPhase : APipePhase
 {
-    public AddressableAssetSettings Setting { get; set; }
-    public AddressableAssetGroupTemplate GroupTemplete { get; set; }
-
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
+        if (context == null)
+            throw new System.ArgumentNullException("context");
+
+        if (context.setting == null)
+            throw new System.ArgumentNullException("context.setting");
+
+        if (context.groupTemplete == null)
+            throw new System.ArgumentNullException("context.groupTemplete");
+
+        List<AssetEntry> assets = context.assets;
         if (assets == null)
-            throw new System.ArgumentNullException("assets");
+            return false;
 
         for (int i = 0; i < assets.Count; i++)
         {
@@ -22,14 +30,21 @@ public class CreateGroupPhase : IPiplePhase
                 continue;
 
             string assetPath = entry.assetPath;
-            CreateGroupForAsset(assetPath, Setting, GroupTemplete);
+            CreateGroupForAsset(assetPath, context.setting, context.groupTemplete);
         }
 
         await Task.FromResult(true);
         return true;
     }
 
-    static void CreateGroupForAsset(string assetPath, AddressableAssetSettings setting, AddressableAssetGroupTemplate groupTemplete)
+    /// <summary>
+    /// 为指定的资源创建相应的组
+    /// </summary>
+    /// <param name="assetPath"></param>
+    /// <param name="setting"></param>
+    /// <param name="groupTemplete"></param>
+    /// <returns></returns>
+    static AddressableAssetEntry CreateGroupForAsset(string assetPath, AddressableAssetSettings setting, AddressableAssetGroupTemplate groupTemplete)
     {
         string guid = AssetDatabase.AssetPathToGUID(assetPath);
         var entry = setting.FindAssetEntry(guid);
@@ -40,8 +55,9 @@ public class CreateGroupPhase : IPiplePhase
         }
         else
         {
-            CreateEntryToNewGroup(setting, groupTemplete, assetPath);
+            entry = CreateEntryToNewGroup(setting, groupTemplete, assetPath);
         }
+        return entry;
     }
 
     /// <summary>

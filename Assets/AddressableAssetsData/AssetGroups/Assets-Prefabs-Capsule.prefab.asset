@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 4dc58b836ebd48349a9bed1c675e5f9b
   m_SerializeEntries:
   - m_GUID: 041e184f4705a8a4f8f59772b8c25cf3
-    m_Address: Assets/Prefabs/Capsule.prefab
+    m_Address: Capsule.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}

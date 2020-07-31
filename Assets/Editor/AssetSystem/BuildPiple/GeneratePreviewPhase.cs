@@ -6,14 +6,18 @@ using System.IO;
 using UnityEditor;
 using System.Linq;
 
-public class GeneratePreviewPhase : IPiplePhase
+public class GeneratePreviewPhase : APipePhase
 {
     public string OutputPath { get; set; }
     
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
+        if (context == null)
+            throw new System.ArgumentNullException("context");
+
+        List<AssetEntry> assets = context.assets;
         if (assets == null)
-            throw new System.ArgumentNullException("assets");
+            return false;
 
         string previewOutputDir = Path.Combine(OutputPath, "preview").Replace('\\', '/');
         List<string> assetPaths = assets.Select(v => v.assetPath).ToList();

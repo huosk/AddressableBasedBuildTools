@@ -13,42 +13,60 @@ using UnityEngine.AddressableAssets;
 
 public class BuildContent
 {
-    static string assetBuildFolder = "Assets/Prefabs";
-
-    static string buildProfileName = "RemoteBuildPath";
-    static string loadProfileName = "RemoteLoadPath";
-
-    static string previewSaveFolder = "ServerData/Previews";
+    static string settingFile = "Assets/Editor/AssetSystem/BuildSetting.asset";
 
     [MenuItem("Tools/Build Asset System/更新资源")]
     static async void UpdateContent()
     {
+        // 保存一下项目，否则有些修改将无法起效
+        if (!NotifySaveProject())
+            return;
+
+        var systemSetting = GetOrCreateSystemSetting();
+
         var setting = AddressableAssetSettingsDefaultObject.Settings;
         if (setting == null)
             return;
 
         // 创建组模板
-        var groupTemplete = PipleUtility.GetTemplete(setting);
+        var groupTemplete = PipleUtility.GetTemplete(setting, true);
         var groupTempleteBundleSchema = groupTemplete.GetSchemaByType(typeof(BundledAssetGroupSchema)) as BundledAssetGroupSchema;
         string groupBuildPath = groupTempleteBundleSchema.BuildPath.GetValue(setting.profileSettings, setting.activeProfileId);
+        string groupLoadPath = groupTempleteBundleSchema.LoadPath.GetValue(setting.profileSettings, setting.activeProfileId);
 
-        BuildPiple piple = new BuildPiple();
-        piple.AddPhase(new CollectBuildEntryPhase() { TargetPath = assetBuildFolder });
-        piple.AddPhase(new CollectDependencyPhase() { Recursive = false });
-        piple.AddPhase(new CreateGroupPhase()
+        PipeContext context = new PipeContext();
+        context.buildSetting = systemSetting;
+        context.setting = setting;
+        context.groupTemplete = groupTemplete;
+
+        // 构建内容更新管线
+        BuildPipe pipe = new BuildPipe();
+        pipe.AddPhase(new ClearEmptyGroupPhase());
+        pipe.AddPhase(new CollectBuildEntryPhase() { TargetPath = systemSetting.BuildFolder });
+        pipe.AddPhase(new CollectDependencyPhase());
+        pipe.AddPhase(new CreateGroupPhase());
+        pipe.AddPhase(new ModifyEntryAddressPhase());
+
+        pipe.AddPhase(new UpdateContentPhase());
+        pipe.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
+        pipe.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
+        pipe.AddPhase(new UploadEntryPhase()
         {
-            Setting = setting,
-            GroupTemplete = groupTemplete
+            HostType = systemSetting.UploadHostType,
+            Host = systemSetting.UploadHost,
+            UserName = systemSetting.UserName,
+            Password = systemSetting.Password,
+            RemoteBuildPath = groupBuildPath,
+            RemoteLoadPath = groupLoadPath,
+            OnWillProcess = (c) =>
+            {
+                return EditorUtility.DisplayDialog("提示", "是否上传到服务器？", "是", "取消");
+            }
         });
-
-        piple.AddPhase(new UpdateContentPhase() { Setting = setting });
-        piple.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
-        piple.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
 
         try
         {
-            List<AssetEntry> assets = new List<AssetEntry>();
-            await piple.ProcessPiple(assets);
+            await pipe.ProcessPiple(context);
         }
         catch (System.Exception e)
         {
@@ -61,6 +79,11 @@ public class BuildContent
     [MenuItem("Tools/Build Asset System/新版本打包")]
     static async void BuildNewContent()
     {
+        if (!NotifySaveProject())
+            return;
+
+        var systemSetting = GetOrCreateSystemSetting();
+
         var setting = AddressableAssetSettingsDefaultObject.Settings;
         if (setting == null)
             return;
@@ -71,27 +94,29 @@ public class BuildContent
         }
 
         // 创建组模板
-        var groupTemplete = PipleUtility.GetTemplete(setting);
+        var groupTemplete = PipleUtility.GetTemplete(setting, true);
         var groupTempleteBundleSchema = groupTemplete.GetSchemaByType(typeof(BundledAssetGroupSchema)) as BundledAssetGroupSchema;
         string groupBuildPath = groupTempleteBundleSchema.BuildPath.GetValue(setting.profileSettings, setting.activeProfileId);
 
-        BuildPiple piple = new BuildPiple();
-        piple.AddPhase(new CollectBuildEntryPhase() { TargetPath = assetBuildFolder });
-        piple.AddPhase(new CollectDependencyPhase() { Recursive = false });
-        piple.AddPhase(new CreateGroupPhase()
-        {
-            Setting = setting,
-            GroupTemplete = groupTemplete
-        });
+        PipeContext context = new PipeContext();
+        context.buildSetting = systemSetting;
+        context.setting = setting;
+        context.groupTemplete = groupTemplete;
 
-        piple.AddPhase(new BuildContentPhase() { Setting = setting });
-        piple.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
-        piple.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
+        BuildPipe pipe = new BuildPipe();
+        pipe.AddPhase(new ClearEmptyGroupPhase());
+        pipe.AddPhase(new CollectBuildEntryPhase() { TargetPath = systemSetting.BuildFolder });
+        pipe.AddPhase(new CollectDependencyPhase() { Recursive = false });
+        pipe.AddPhase(new CreateGroupPhase());
+        pipe.AddPhase(new ModifyEntryAddressPhase());
+
+        pipe.AddPhase(new BuildContentPhase() { Setting = setting });
+        pipe.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
+        pipe.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
 
         try
         {
-            List<AssetEntry> assets = new List<AssetEntry>();
-            await piple.ProcessPiple(assets);
+            await pipe.ProcessPiple(context);
         }
         catch (System.Exception e)
         {
@@ -99,6 +124,31 @@ public class BuildContent
         }
 
         Debug.Log("资源更新完成");
+    }
+
+    static bool NotifySaveProject()
+    {
+        if (EditorUtility.DisplayDialog("提示", "是否保存项目?", "确定", "取消"))
+        {
+            AssetDatabase.SaveAssets();
+            return true;
+        }
+
+        return false;
+    }
+
+    static BuildSystemSetting GetOrCreateSystemSetting()
+    {
+        var setting = AssetDatabase.LoadAssetAtPath<BuildSystemSetting>(settingFile);
+        if (setting == null)
+        {
+            var newObj = ScriptableObject.CreateInstance<BuildSystemSetting>();
+            AssetDatabase.CreateAsset(newObj, settingFile);
+            setting = AssetDatabase.LoadAssetAtPath<BuildSystemSetting>(settingFile);
+            EditorUtility.SetDirty(setting);
+        }
+
+        return setting;
     }
 }
 
@@ -115,6 +165,7 @@ public enum AssetType
     Texture,
     AudioClip,
     AnimationClip,
+    Shader,
 }
 
 public class AssetEntry

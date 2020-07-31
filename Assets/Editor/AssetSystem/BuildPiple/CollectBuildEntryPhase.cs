@@ -5,14 +5,17 @@ using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
 
-public class CollectBuildEntryPhase : IPiplePhase
+public class CollectBuildEntryPhase : APipePhase
 {
     public string TargetPath { get; set; }
 
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
-        if (assets == null)
-            throw new System.ArgumentNullException("assets");
+        if (context == null)
+            throw new System.ArgumentNullException("context");
+
+        if (context.assets == null)
+            context.assets = new List<AssetEntry>();
 
         List<string> files = CollectAssetsToBuild(TargetPath);
         for (int i = 0; i < files.Count; i++)
@@ -21,7 +24,7 @@ public class CollectBuildEntryPhase : IPiplePhase
             Object obj = AssetDatabase.LoadAssetAtPath(assetPath, typeof(Object));
             var type = PipleUtility.GetAssetType(obj);
 
-            assets.Add(new AssetEntry()
+            context.assets.Add(new AssetEntry()
             {
                 assetPath = assetPath,
                 type = type

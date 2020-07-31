@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using System.Linq;
 
-public class CollectDependencyPhase : IPiplePhase
+public class CollectDependencyPhase : APipePhase
 {
     public bool Recursive { get; set; }
 
@@ -14,10 +14,14 @@ public class CollectDependencyPhase : IPiplePhase
         Recursive = true;
     }
 
-    public async Task<bool> Process(List<AssetEntry> assets)
+    public override async Task<bool> Process(PipeContext context)
     {
+        if (context == null)
+            throw new System.ArgumentNullException("context");
+
+        var assets = context.assets;
         if (assets == null)
-            throw new System.ArgumentNullException("assets");
+            return true;
 
         AssetEntry[] origins = assets.ToArray();
 

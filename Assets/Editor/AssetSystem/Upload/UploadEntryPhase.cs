@@ -4,50 +4,78 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using System;
+using System.Net;
+using System.Linq;
 
-public class UploadEntryPhase : IPiplePhase
+public class UploadEntryPhase : APipePhase
 {
-    public IUploadClient Client { get; set; }
+    public HostType HostType { get; set; }
+    public string Host { get; set; }
+    public string UserName { get; set; }
+    public string Password { get; set; }
     public string RemoteBuildPath { get; set; }
     public string RemoteLoadPath { get; set; }
+    public Func<PipeContext, bool> OnWillProcess { get; set; }
 
-    public async Task<bool> Process(List<AssetEntry> assets)
+    private IUploadClient client;
+
+    public override async Task<bool> Process(PipeContext context)
     {
-        List<UploadGroupInfo> needToUpload = new List<UploadGroupInfo>();
+        if (context == null)
+            throw new System.ArgumentNullException("context");
 
-        for (int i = 0; i < assets.Count; i++)
+        if (OnWillProcess != null && !OnWillProcess(context))
+            return true;
+
+        if (client == null)
         {
-            var entry = assets[i];
-            if (entry == null)
-                continue;
+            var ipAddress = await Dns.GetHostAddressesAsync(Host);
+            var ipv4Addr = ipAddress.FirstOrDefault((v) => v.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
 
-            List<string> files = new List<string>();
-            files.Add(entry.assetPath);
-            if (!string.IsNullOrEmpty(entry.preview))
-            {
-                files.Add(entry.preview);
-            }
+            client = GetClientByHost(HostType.Ftp);
+            client.Host = ipv4Addr.ToString();
+            client.UserName = UserName;
+            client.Password = Password;
 
-            var inf = new UploadGroupInfo();
-            inf.localPath = RemoteBuildPath;
-            inf.remotePath = RemoteLoadPath;
-            inf.files = files.ToArray();
-
-            needToUpload.Add(inf);
+            await client.Initialize();
         }
+
+        List<UploadGroupInfo> needToUpload = new List<UploadGroupInfo>();
+        needToUpload.Add(new UploadGroupInfo()
+        {
+            localPath = RemoteBuildPath,
+            remotePath = RemoteLoadPath,
+            files = Directory.GetFiles(RemoteBuildPath, "*.*", SearchOption.AllDirectories)
+        });
 
         bool success = true;
         try
         {
-            await UploadGroups(Client, needToUpload);
+            await UploadGroups(client, needToUpload);
         }
         catch (System.Exception e)
         {
             success = false;
             Debug.LogException(e);
         }
+        finally
+        {
+            await client.Release();
+            client = null;
+        }
 
         return success;
+    }
+
+    public static IUploadClient GetClientByHost(HostType type)
+    {
+        if (type == HostType.Ftp)
+            return new FtpUploadClient();
+        else if (type == HostType.Http)
+            return new HttpUploadClient();
+        else
+            throw new NotSupportedException("不支持上传::" + type);
     }
 
     public static async Task UploadGroups(IUploadClient uploader, List<UploadGroupInfo> uploadGroups)
@@ -66,6 +94,12 @@ public class UploadEntryPhase : IPiplePhase
             foreach (var file in files)
             {
                 var newFile = file.Replace('\\', '/');
+                if (!newFile.StartsWith(basePath))
+                {
+                    Debug.LogFormat("{0} not at path::{1}", newFile, basePath);
+                    continue;
+                }
+
                 var relPath = newFile.Substring(basePath.Length);
                 var remoteFile = (groupLoadPath + relPath).Replace('\\', '/');
 

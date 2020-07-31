@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 8075e04dbc7a67a45b0269817f868fac
   m_SerializeEntries:
   - m_GUID: cdf225bc4116d8d4cb71653a8bf3678f
-    m_Address: Assets/Textures/man30_Eye_Colour.jpg
+    m_Address: Textures/man30_Eye_Colour.jpg
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}

@@ -15,6 +15,7 @@ public interface IUploadClient
 
 public enum HostType
 {
+    Unknown,
     Ftp,
     Http,
 }
