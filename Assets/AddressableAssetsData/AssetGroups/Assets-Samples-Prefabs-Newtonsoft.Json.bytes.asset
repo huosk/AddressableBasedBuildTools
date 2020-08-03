@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Assets-Prefabs-com.jucheng.yixian.bytes
+  m_Name: Assets-Samples-Prefabs-Newtonsoft.Json.bytes
   m_EditorClassIdentifier: 
-  m_GroupName: Assets-Prefabs-com.jucheng.yixian.bytes
+  m_GroupName: Assets-Samples-Prefabs-Newtonsoft.Json.bytes
   m_Data:
     m_SerializedData: []
-  m_GUID: 0ee4fe2b41ac8fd41a8f32aa364331dc
+  m_GUID: 6d5f9c1ce26684b44bc1b1c1b044d096
   m_SerializeEntries:
-  - m_GUID: f08b3709bfb1f4249bab007110c88bbd
-    m_Address: com.jucheng.yixian.bytes
+  - m_GUID: 15ae05842791e8743af72c10fca510e6
+    m_Address: Newtonsoft.Json
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}
@@ -27,5 +27,5 @@ MonoBehaviour:
   m_Settings: {fileID: 11400000, guid: 1397cce077cafcd41ab8527bde8816cd, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: dbbe415ca4011b2469896a84596728f9, type: 2}
-    - {fileID: 11400000, guid: 403d49c41b9c59746a543e01024150fb, type: 2}
+    - {fileID: 11400000, guid: 9e3421081bd801048bac168de4b83e27, type: 2}
+    - {fileID: 11400000, guid: 870a09b57ed7b38478a5446a55c6dccc, type: 2}

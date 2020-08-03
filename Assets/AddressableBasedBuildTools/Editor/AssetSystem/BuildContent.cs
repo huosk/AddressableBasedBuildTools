@@ -13,7 +13,7 @@ using UnityEngine.AddressableAssets;
 
 public class BuildContent
 {
-    static string settingFile = "Assets/Editor/AssetSystem/BuildSetting.asset";
+    static string settingFile = "Assets/AddressableBasedBuildTools/Editor/AssetSystem/BuildSetting.asset";
 
     [MenuItem("Tools/Build Asset System/更新资源")]
     static async void UpdateContent()
@@ -43,6 +43,10 @@ public class BuildContent
         BuildPipe pipe = new BuildPipe();
         pipe.AddPhase(new ClearEmptyGroupPhase());
         pipe.AddPhase(new CollectBuildEntryPhase() { TargetPath = systemSetting.BuildFolder });
+
+        if (systemSetting.ExportDll)
+            pipe.AddPhase(new CollectDllAsTextPhase());
+
         pipe.AddPhase(new CollectDependencyPhase());
         pipe.AddPhase(new CreateGroupPhase());
         pipe.AddPhase(new ModifyEntryAddressPhase());

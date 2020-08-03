@@ -18,11 +18,11 @@ MonoBehaviour:
   m_GUID: 4e3574cb6900c214188ba43ddb08e9e9
   m_SerializeEntries:
   - m_GUID: 7c75e2de54197db4abf7fd317fe4b466
-    m_Address: Textures/New Material.mat
+    m_Address: New Material
     m_ReadOnly: 0
     m_SerializedLabels: []
-    m_MainAsset: {fileID: 2100000, guid: 7c75e2de54197db4abf7fd317fe4b466, type: 2}
-    m_TargetAsset: {fileID: 2100000, guid: 7c75e2de54197db4abf7fd317fe4b466, type: 2}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 1397cce077cafcd41ab8527bde8816cd, type: 2}
   m_SchemaSet:

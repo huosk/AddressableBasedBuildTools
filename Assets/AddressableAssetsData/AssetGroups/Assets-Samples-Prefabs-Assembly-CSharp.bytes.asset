@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Assets-Textures-man30_Eye_Colour.jpg
+  m_Name: Assets-Samples-Prefabs-Assembly-CSharp.bytes
   m_EditorClassIdentifier: 
-  m_GroupName: Assets-Textures-man30_Eye_Colour.jpg
+  m_GroupName: Assets-Samples-Prefabs-Assembly-CSharp.bytes
   m_Data:
     m_SerializedData: []
-  m_GUID: 8075e04dbc7a67a45b0269817f868fac
+  m_GUID: 98654747418179949a7acefea1da120a
   m_SerializeEntries:
-  - m_GUID: cdf225bc4116d8d4cb71653a8bf3678f
-    m_Address: man30_Eye_Colour
+  - m_GUID: e9899e0a290eb2444a20c7ade5d3e97e
+    m_Address: Assembly-CSharp
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}
@@ -27,5 +27,5 @@ MonoBehaviour:
   m_Settings: {fileID: 11400000, guid: 1397cce077cafcd41ab8527bde8816cd, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 20a18c88e2fb512478da274c160e6935, type: 2}
-    - {fileID: 11400000, guid: 49b5041b3bd2fa642a63aa09226346a0, type: 2}
+    - {fileID: 11400000, guid: 29b0641167d38d14d9e6e33ef8994fbf, type: 2}
+    - {fileID: 11400000, guid: af1d09ae7351f3248b74c4527693a6bd, type: 2}

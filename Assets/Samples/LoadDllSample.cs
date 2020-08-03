@@ -11,6 +11,15 @@ public class LoadDllSample : MonoBehaviour
 {
     private IModule loadedModule;
 
+    [ExportAssembly]
+    static List<Assembly> ExportList()
+    {
+        return new List<Assembly>() {
+            typeof(LoadDllSample).Assembly,
+            typeof(Newtonsoft.Json.JsonConvert).Assembly,
+        };
+    }
+
     // Start is called before the first frame update
     async void Start()
     {
