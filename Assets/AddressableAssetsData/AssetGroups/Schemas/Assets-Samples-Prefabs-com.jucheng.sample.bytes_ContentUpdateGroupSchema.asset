@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5834b5087d578d24c926ce20cd31e6d6, type: 3}
-  m_Name: Assets-Samples-Prefabs-Assembly-CSharp.bytes_ContentUpdateGroupSchema
+  m_Name: Assets-Samples-Prefabs-com.jucheng.sample.bytes_ContentUpdateGroupSchema
   m_EditorClassIdentifier: 
-  m_Group: {fileID: 11400000, guid: d2707de572c1e754b9b4342fb38cb211, type: 2}
+  m_Group: {fileID: 11400000, guid: 1c2f5aac69dd22949998c1d799bb1763, type: 2}
   m_StaticContent: 0
