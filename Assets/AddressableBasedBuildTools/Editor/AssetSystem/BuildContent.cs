@@ -166,6 +166,8 @@ public enum AssetType
     AudioClip,
     AnimationClip,
     Shader,
+    Text,
+    Binary,
 }
 
 public class AssetEntry
