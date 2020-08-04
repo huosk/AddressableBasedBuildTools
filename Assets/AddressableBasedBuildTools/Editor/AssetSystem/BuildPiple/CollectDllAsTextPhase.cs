@@ -12,7 +12,7 @@ public class CollectDllAsTextPhase : APipePhase
 {
     public override async Task<bool> Process(PipeContext context)
     {
-        var input = DllToBuild.GetAssemblies();
+        var input = DllToBuild.GetAssembliesToExport();
         if (input == null || input.Count == 0)
             return true;
 
@@ -94,7 +94,13 @@ public class CollectDllAsTextPhase : APipePhase
 
 public class DllToBuild
 {
-    public static List<Assembly> GetAssemblies()
+    public static List<Assembly> GetAssembliesToExport()
+    {
+        return GetAssemblies<ExportAssemblyAttribute>();
+    }
+
+    private static IEnumerable<MethodInfo> GetMethodsWithAttribute<T>()
+        where T : System.Attribute
     {
         var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
         var methods = assemblies.Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
@@ -102,7 +108,7 @@ public class DllToBuild
             .SelectMany(t =>
             {
                 var ms = t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                return ms.Where(m => Attribute.IsDefined(m, typeof(ExportAssemblyAttribute)));
+                return ms.Where(m => Attribute.IsDefined(m, typeof(T)));
             })
             .Where(m =>
             {
@@ -114,6 +120,13 @@ public class DllToBuild
             .Distinct()
             .ToList();
 
+        return methods;
+    }
+
+    private static List<Assembly> GetAssemblies<T>()
+        where T : System.Attribute
+    {
+        var methods = GetMethodsWithAttribute<T>();
         List<Assembly> list = new List<Assembly>();
 
         foreach (var method in methods)
