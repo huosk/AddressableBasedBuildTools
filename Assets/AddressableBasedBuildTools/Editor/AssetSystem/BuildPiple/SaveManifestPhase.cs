@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 
 public class SaveManifestPhase : APipePhase
 {
@@ -27,7 +25,7 @@ public class SaveManifestPhase : APipePhase
 
         try
         {
-            File.WriteAllText(previewCatalogFile, JsonConvert.SerializeObject(manifestFile, Formatting.Indented));
+            File.WriteAllText(previewCatalogFile, JsonUtility.ToJson(manifestFile, true));
             context.manifestFile = previewCatalogFile;
         }
         catch (System.Exception e)

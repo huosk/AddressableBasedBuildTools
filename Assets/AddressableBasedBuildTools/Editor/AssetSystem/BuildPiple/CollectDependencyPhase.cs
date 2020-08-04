@@ -46,6 +46,9 @@ public class CollectDependencyPhase : APipePhase
                 if (depObj == null)
                     continue;
 
+                if (depObj is MonoScript)
+                    continue;
+
                 assets.Add(new AssetEntry()
                 {
                     assetPath = depAssetPath,

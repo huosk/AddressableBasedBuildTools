@@ -1,15 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Build;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 public class BuildContent
 {
@@ -156,6 +151,7 @@ public class BuildContent
     }
 }
 
+[Serializable]
 public class AssetManifestFile
 {
     public List<AssetEntry> assets = new List<AssetEntry>();
@@ -172,12 +168,14 @@ public enum AssetType
     Shader,
     Text,
     Binary,
+    Custom,
 }
 
+[Serializable]
 public class AssetEntry
 {
-    public AssetType type;
-    public string assetPath;
-    public string preview;
-    public string[] tags;
+    public AssetType type = AssetType.Unknown;
+    public string assetPath = null;
+    public string preview = null;
+    public string[] tags = null;
 }

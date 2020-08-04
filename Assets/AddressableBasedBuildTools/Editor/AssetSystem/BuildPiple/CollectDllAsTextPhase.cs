@@ -20,36 +20,34 @@ public class CollectDllAsTextPhase : APipePhase
 
         foreach (var assembly in assemblies)
         {
-            if (assembly == null)
-                continue;
-
-            if (string.IsNullOrEmpty(assembly.Location))
-                continue;
-
-            string file = Path.GetFileName(assembly.Location);
-            string newFile = Path.ChangeExtension(file, "bytes");
-
-            string copyDir = context.buildSetting.BuildFolder;
-            string destFile = copyDir + "/" + newFile;
-
-            try
-            {
-                byte[] bytes = File.ReadAllBytes(assembly.Location);
-                File.WriteAllBytes(destFile, bytes);
-                AssetDatabase.ImportAsset(destFile, ImportAssetOptions.ForceUpdate);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogException(e);
-            }
-
-            var obj = AssetDatabase.LoadAssetAtPath<TextAsset>(destFile);
+            string outputDir = context.buildSetting.BuildFolder;
+            var obj = SaveDllAsText(assembly, outputDir);
             if (obj != null)
             {
+                /*
+                 * 这里采用 ScriptableObject 来存储 Dll 及其引用数据，这样做的优势是简化加载时的依赖处理，
+                 * 当加载 AssemblyData 的时候，Addressable 会自动加载依赖；
+                 * 
+                 * 但是采用 ScriptableObject 在跨工程时，需要特别注意，脚本不能直接在外部拷贝，必须通过 
+                 * UnityPackage 或者 PackageManager 的方式加载到工程当中，否则无法解析对象。
+                 */
+                var ad = ScriptableObject.CreateInstance<AssemblyData>();
+                string adFile = outputDir + "/" + Path.GetFileNameWithoutExtension(assembly.Location) + "_info.asset";
+                AssetDatabase.CreateAsset(ad, adFile);
+                ad = AssetDatabase.LoadAssetAtPath<AssemblyData>(adFile);
+                ad.mainDll = obj;
+                EditorUtility.SetDirty(ad);
+
                 context.assets.Add(new AssetEntry()
                 {
                     assetPath = AssetDatabase.GetAssetPath(obj),
                     type = AssetType.Text
+                });
+
+                context.assets.Add(new AssetEntry()
+                {
+                    assetPath = AssetDatabase.GetAssetPath(ad),
+                    type = AssetType.Custom
                 });
             }
         }
@@ -57,6 +55,40 @@ public class CollectDllAsTextPhase : APipePhase
         await Task.FromResult(true);
 
         return true;
+    }
+
+    private static TextAsset SaveDllAsText(Assembly assembly, string outputDir)
+    {
+        if (assembly == null)
+            return null;
+
+        if (string.IsNullOrEmpty(assembly.Location))
+            return null;
+
+        string file = Path.GetFileName(assembly.Location);
+        string newFile = Path.ChangeExtension(file, "bytes");
+
+        string copyDir = outputDir;
+        string destFile = copyDir + "/" + newFile;
+
+        return SaveFileAsText(assembly.Location, destFile);
+    }
+
+    private static TextAsset SaveFileAsText(string dllFile, string destFile)
+    {
+        try
+        {
+            byte[] bytes = File.ReadAllBytes(dllFile);
+            File.WriteAllBytes(destFile, bytes);
+            AssetDatabase.ImportAsset(destFile, ImportAssetOptions.ForceUpdate);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogException(e);
+        }
+
+        var obj = AssetDatabase.LoadAssetAtPath<TextAsset>(destFile);
+        return obj;
     }
 }
 
