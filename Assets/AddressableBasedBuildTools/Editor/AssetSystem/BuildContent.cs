@@ -18,6 +18,11 @@ public class BuildContent
             return;
 
         var systemSetting = GetOrCreateSystemSetting();
+        if (string.IsNullOrEmpty(systemSetting.BuildFolder))
+        {
+            Debug.LogError("未设置打包目录.");
+            return;
+        }
 
         var setting = AddressableAssetSettingsDefaultObject.Settings;
         if (setting == null)
@@ -141,6 +146,10 @@ public class BuildContent
         var setting = AssetDatabase.LoadAssetAtPath<BuildSystemSetting>(settingFile);
         if (setting == null)
         {
+            string dir = Path.GetDirectoryName(settingFile);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
             var newObj = ScriptableObject.CreateInstance<BuildSystemSetting>();
             AssetDatabase.CreateAsset(newObj, settingFile);
             setting = AssetDatabase.LoadAssetAtPath<BuildSystemSetting>(settingFile);
