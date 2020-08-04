@@ -37,7 +37,7 @@ public class PreviewBuilder
         if (obj == null)
             return default;
 
-        Selection.activeObject = obj;
+        //Selection.activeObject = obj;
         Texture2D tex = AssetPreview.GetAssetPreview(obj);
         int tryCount = 0;
         while ((tex == null || AssetPreview.IsLoadingAssetPreview(obj.GetInstanceID())) && tryCount < 5)

@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class BuildContent
@@ -52,7 +53,13 @@ public class BuildContent
         pipe.AddPhase(new ModifyEntryAddressPhase());
 
         pipe.AddPhase(new UpdateContentPhase());
-        pipe.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
+
+        if (systemSetting.GeneratePreview)
+        {
+            string previewOutput = Path.Combine(groupBuildPath, "preview").Replace('\\', '/');
+            pipe.AddPhase(new GeneratePreviewPhase() { OutputPath = previewOutput });
+        }
+
         pipe.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
         pipe.AddPhase(new UploadEntryPhase()
         {
@@ -101,6 +108,7 @@ public class BuildContent
         var groupTemplete = PipleUtility.GetTemplete(setting, true);
         var groupTempleteBundleSchema = groupTemplete.GetSchemaByType(typeof(BundledAssetGroupSchema)) as BundledAssetGroupSchema;
         string groupBuildPath = groupTempleteBundleSchema.BuildPath.GetValue(setting.profileSettings, setting.activeProfileId);
+        string groupLoadPath = groupTempleteBundleSchema.LoadPath.GetValue(setting.profileSettings, setting.activeProfileId);
 
         PipeContext context = new PipeContext();
         context.buildSetting = systemSetting;
@@ -110,6 +118,10 @@ public class BuildContent
         BuildPipe pipe = new BuildPipe();
         pipe.AddPhase(new ClearEmptyGroupPhase());
         pipe.AddPhase(new CollectBuildEntryPhase() { TargetPath = systemSetting.BuildFolder });
+
+        if (systemSetting.ExportDll)
+            pipe.AddPhase(new CollectDllAsTextPhase());
+
         pipe.AddPhase(new CollectDependencyPhase() { Recursive = false });
         pipe.AddPhase(new CreateGroupPhase());
         pipe.AddPhase(new ModifyEntryAddressPhase());
@@ -117,6 +129,19 @@ public class BuildContent
         pipe.AddPhase(new BuildContentPhase() { Setting = setting });
         pipe.AddPhase(new GeneratePreviewPhase() { OutputPath = Path.Combine(groupBuildPath, "preview").Replace('\\', '/') });
         pipe.AddPhase(new SaveManifestPhase() { OutputPath = groupBuildPath });
+        pipe.AddPhase(new UploadEntryPhase()
+        {
+            HostType = systemSetting.UploadHostType,
+            Host = systemSetting.UploadHost,
+            UserName = systemSetting.UserName,
+            Password = systemSetting.Password,
+            RemoteBuildPath = groupBuildPath,
+            RemoteLoadPath = groupLoadPath,
+            OnWillProcess = (c) =>
+            {
+                return EditorUtility.DisplayDialog("提示", "是否上传到服务器？", "是", "取消");
+            }
+        });
 
         try
         {
@@ -132,13 +157,8 @@ public class BuildContent
 
     static bool NotifySaveProject()
     {
-        if (EditorUtility.DisplayDialog("提示", "是否保存项目?", "确定", "取消"))
-        {
-            AssetDatabase.SaveAssets();
-            return true;
-        }
-
-        return false;
+        AssetDatabase.SaveAssets();
+        return true;
     }
 
     static BuildSystemSetting GetOrCreateSystemSetting()

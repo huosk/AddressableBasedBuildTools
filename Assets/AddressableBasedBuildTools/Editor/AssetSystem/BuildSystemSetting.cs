@@ -38,6 +38,7 @@ public class BuildSystemSetting : ScriptableObject
     public string BuildFolder { get { return m_BuildFolder; } }
     public EntryAddressType AssetKeyBuildType { get { return m_EntryAddressType; } }
     public bool ExportDll { get { return m_ExportDll; } }
+    public bool GeneratePreview { get { return m_GeneratePreview; } }
 
 #pragma warning disable CS0649
     [SerializeField] string m_UploadHost;
@@ -46,6 +47,7 @@ public class BuildSystemSetting : ScriptableObject
     [SerializeField] string m_BuildFolder;
     [SerializeField] EntryAddressType m_EntryAddressType;
     [SerializeField] bool m_ExportDll;
+    [SerializeField] bool m_GeneratePreview = true;
 #pragma warning restore
 }
 

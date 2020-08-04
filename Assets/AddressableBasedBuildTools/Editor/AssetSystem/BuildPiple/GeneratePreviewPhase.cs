@@ -44,11 +44,9 @@ public class GeneratePreviewPhase : APipePhase
                 success = false;
                 Debug.LogException(e);
             }
-            finally
-            {
-                EditorUtility.ClearProgressBar();
-            }
         }
+
+        EditorUtility.ClearProgressBar();
 
         return success;
     }

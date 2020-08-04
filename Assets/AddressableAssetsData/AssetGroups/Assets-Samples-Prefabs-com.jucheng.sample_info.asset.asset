@@ -10,16 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Assets-Samples-Prefabs-com.jucheng.sample_info.asset1
+  m_Name: Assets-Samples-Prefabs-com.jucheng.sample_info.asset
   m_EditorClassIdentifier: 
-  m_GroupName: Assets-Samples-Prefabs-com.jucheng.sample_info.asset1
+  m_GroupName: Assets-Samples-Prefabs-com.jucheng.sample_info.asset
   m_Data:
     m_SerializedData: []
-  m_GUID: 10d7f6ce6a881a44ea1218a6949deaa0
-  m_SerializeEntries: []
+  m_GUID: 950d80341aa24124ca20864b58299938
+  m_SerializeEntries:
+  - m_GUID: 2b405110a90ba3a4090dc39f4e3bc691
+    m_Address: com.jucheng.sample_info
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 1397cce077cafcd41ab8527bde8816cd, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: fdc8b7331d264f64fa5dce8bff01310b, type: 2}
-    - {fileID: 11400000, guid: d4f8d08a0d594b2438e2ba29ba0da994, type: 2}
+    - {fileID: 11400000, guid: ca02fd7c0eee4644c8e67607dcd76638, type: 2}
+    - {fileID: 11400000, guid: a80912c53ffef494aad1cff1ae03244d, type: 2}

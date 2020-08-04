@@ -118,11 +118,9 @@ public class UploadEntryPhase : APipePhase
                 {
                     Debug.LogErrorFormat("上传失败，{0},{1}", remoteFile, e.Message);
                 }
-                finally
-                {
-                    EditorUtility.ClearProgressBar();
-                }
             }
+
+            EditorUtility.ClearProgressBar();
         }
     }
 }
